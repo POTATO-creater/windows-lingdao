@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+    />
+    <title>灵动岛</title>
+    <link rel="stylesheet" href="styles/tokens.css" />
+    <link rel="stylesheet" href="styles/base.css" />
+    <link rel="stylesheet" href="styles/island.css" />
+    <link rel="stylesheet" href="styles/weather.css" />
+    <link rel="stylesheet" href="styles/alarm.css" />
+  </head>
+  <body>
+    <div id="app" data-state="collapsed" data-tab="weather">
+      <!-- ================= 胶囊本体 ================= -->
+      <div class="island" id="island">
+        <div class="island__glass"></div>
+        <div class="island__sheen"></div>
+
+        <!-- ---------- 顶栏 ---------- -->
+        <header class="bar" id="bar">
+          <div class="bar__side">
+            <!-- 收起态：图标 + 温度 -->
+            <div class="bar__swap is-collapsed-only">
+              <span class="bar__icon" id="barWxIcon" style="display: none"> </span>
+              <span class="bar__temp" id="barTemp">--°</span>
+            </div>
+            <!-- 展开态：图标 + 城市 -->
+            <div class="bar__swap is-expanded-only">
+              <span class="bar__icon" id="barWxIcon2" style="display: none"></span>
+              <span class="bar__city" id="barCity">北京</span>
+            </div>
+          </div>
+
+          <div class="bar__center">
+            <span class="bar__time" id="barTime">--:--</span>
+            <span class="bar__sec" id="barSec">00</span>
+          </div>
+
+          <div class="bar__side">
+            <div class="bar__alarm-chip is-collapsed-only" id="barAlarm">
+              <span class="ico" data-icon="bell"></span>
+              <span id="barAlarmTime">--:--</span>
+            </div>
+            <button
+              class="icon-btn is-expanded-only"
+              id="btnCollapse"
+              title="收起"
+              aria-label="收起"
+            >
+              <span class="ico" data-icon="x"></span>
+            </button>
+          </div>
+        </header>
+
+        <!-- ---------- 内容区 ---------- -->
+        <div class="body">
+          <div class="body__scroll scroll" id="scrollArea">
+            <!-- 分段控制器 -->
+            <div class="segmented" id="tabSeg" role="tablist">
+              <div class="segmented__thumb" id="segThumb"></div>
+              <button class="segmented__item" role="tab" data-tab="weather" aria-selected="true">
+                天气
+              </button>
+              <button class="segmented__item" role="tab" data-tab="alarm" aria-selected="false">
+                闹钟
+              </button>
+              <button class="segmented__item" role="tab" data-tab="settings" aria-selected="false">
+                设置
+              </button>
+            </div>
+
+            <!-- ========== 天气 ========== -->
+            <section class="panel is-active" data-panel="weather">
+              <div class="stagger">
+                <div class="wx-hero">
+                  <div class="wx-hero__row">
+                    <div class="wx-hero__temp">
+                      <span id="wxTemp">--</span><span class="wx-hero__deg">°</span>
+                    </div>
+                    <div class="wx-hero__meta">
+                      <div class="wx-hero__text" id="wxText">正在连接</div>
+                      <div class="wx-hero__range" id="wxRange">-- / --</div>
+                    </div>
+                  </div>
+                  <div class="wx-hero__sub">
+                    <span id="wxUpdated">等待数据</span>
+                    <i class="wx-hero__dot"></i>
+                    <button class="link-btn" id="btnCity">切换城市</button>
+                    <i class="wx-hero__dot"></i>
+                    <button class="link-btn" id="btnRefresh">刷新</button>
+                  </div>
+                </div>
+
+                <div class="wx-grid" id="wxGrid">
+                  <div class="wx-cell">
+                    <div class="wx-cell__label">体感</div>
+                    <div class="wx-cell__value" id="wxFeels">--<small>°</small></div>
+                  </div>
+                  <div class="wx-cell">
+                    <div class="wx-cell__label">湿度</div>
+                    <div class="wx-cell__value" id="wxHum">--<small>%</small></div>
+                  </div>
+                  <div class="wx-cell">
+                    <div class="wx-cell__label">风力</div>
+                    <div class="wx-cell__value" id="wxWind">--</div>
+                  </div>
+                  <div class="wx-cell">
+                    <div class="wx-cell__label">能见</div>
+                    <div class="wx-cell__value" id="wxVis">--<small>km</small></div>
+                  </div>
+                </div>
+
+                <div class="wx-chart">
+                  <svg
+                    class="wx-chart__svg"
+                    id="wxChart"
+                    viewBox="0 0 340 64"
+                    preserveAspectRatio="none"
+                  ></svg>
+                  <div class="wx-chart__labels" id="wxChartLabels"></div>
+                </div>
+
+                <div class="wx-days" id="wxDays"></div>
+              </div>
+
+              <!-- 城市搜索浮层 -->
+              <div class="city-panel" id="cityPanel" hidden>
+                <div class="al-form__row" style="margin-bottom: 0">
+                  <input
+                    class="al-form__input"
+                    id="cityInput"
+                    placeholder="输入城市名，如 杭州 / 上海"
+                    autocomplete="off"
+                  />
+                  <button class="icon-btn press" id="btnCityClose" aria-label="取消">
+                    <span class="ico" data-icon="x"></span>
+                  </button>
+                </div>
+                <div class="city-results scroll" id="cityResults"></div>
+              </div>
+            </section>
+
+            <!-- ========== 闹钟 ========== -->
+            <section class="panel" data-panel="alarm">
+              <div class="stagger">
+                <div class="al-header">
+                  <div class="al-clock" id="alNow">--:--<small>现在</small></div>
+                  <div class="al-hint" id="alNext">还没有闹钟</div>
+                </div>
+
+                <div class="al-list" id="alList"></div>
+
+                <div class="al-quick" id="alQuick">
+                  <button data-min="15">＋15 分钟</button>
+                  <button data-min="30">＋30 分钟</button>
+                  <button data-min="60">＋1 小时</button>
+                </div>
+
+                <div id="alFormHost"></div>
+
+                <button class="btn btn--ghost press" id="btnAddAlarm" style="width: 100%">
+                  ＋ 新建闹钟
+                </button>
+              </div>
+            </section>
+
+            <!-- ========== 设置 ========== -->
+            <section class="panel" data-panel="settings">
+              <div class="stagger">
+                <div class="al-header" style="padding-bottom: 12px">
+                  <div class="al-clock" style="font-size: 32px">偏好</div>
+                </div>
+                <div class="settings">
+                  <div class="set-row">
+                    <div class="set-row__left">
+                      <span class="ico" data-icon="sun2"></span>外观
+                    </div>
+                    <div class="segmented set-seg" id="themeSeg">
+                      <div class="segmented__thumb" id="themeThumb"></div>
+                      <button class="segmented__item" data-theme-opt="system">自动</button>
+                      <button class="segmented__item" data-theme-opt="dark">深色</button>
+                      <button class="segmented__item" data-theme-opt="light">浅色</button>
+                    </div>
+                  </div>
+                  <div class="set-row">
+                    <div class="set-row__left">
+                      <span class="ico" data-icon="volume"></span>响铃声音
+                    </div>
+                    <div class="switch" id="swSound" role="switch" aria-checked="true" tabindex="0"></div>
+                  </div>
+                  <div class="set-row">
+                    <div class="set-row__left">
+                      <span class="ico" data-icon="power"></span>开机自动启动
+                    </div>
+                    <div class="switch" id="swAuto" role="switch" aria-checked="false" tabindex="0"></div>
+                  </div>
+                  <div class="set-row" style="opacity: 0.62">
+                    <div class="set-row__left">
+                      <span class="ico" data-icon="refresh"></span>天气刷新
+                    </div>
+                    <span id="setRefresh" style="font-size: 11.5px">每 10 分钟</span>
+                  </div>
+                  <div class="set-row" style="opacity: 0.62">
+                    <div class="set-row__left">
+                      <span class="ico" data-icon="pin"></span>数据来源
+                    </div>
+                    <span style="font-size: 11.5px">和风天气</span>
+                  </div>
+                </div>
+
+                <button
+                  class="btn btn--ghost press"
+                  id="btnQuit"
+                  style="width: 100%; margin-top: 14px; color: var(--danger)"
+                >
+                  退出灵动岛
+                </button>
+                <div style="text-align: center; font-size: 10px; color: var(--text-3); padding: 10px 0">
+                  灵动岛 <span id="appVersion">v1.0.0</span>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- ================= 响铃覆盖层 ================= -->
+        <div class="ring" id="ring">
+          <div class="ring__inner">
+            <div class="ring__icon ico" data-icon="bell"></div>
+            <div class="ring__time" id="ringTime">--:--</div>
+            <div class="ring__label" id="ringLabel">闹钟</div>
+            <div class="ring__actions">
+              <button class="ring__btn ring__btn--snooze press" id="btnSnooze">
+                稍后 9 分钟
+              </button>
+              <button class="ring__btn ring__btn--stop press" id="btnStop">停止</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="scripts/app.js"></script>
+  </body>
+</html>
