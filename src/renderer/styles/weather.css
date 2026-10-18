@@ -1,0 +1,268 @@
+/* ==================================================================
+   天气面板：大字号温度、详情网格、温度曲线、三日预报
+   ================================================================== */
+
+.panel {
+  display: none;
+}
+.panel.is-active {
+  display: block;
+  animation: panel-in 320ms var(--ease-out) both;
+}
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+}
+
+/* ---- 主温度区 ---- */
+.wx-hero {
+  padding: 10px 0 16px;
+}
+
+.wx-hero__row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.wx-hero__temp {
+  display: flex;
+  align-items: flex-start;
+  font-family: var(--font-num);
+  /* 光学字号：超大字号要减轻字重、收紧字距，否则显得笨重 */
+  font-size: 88px;
+  font-weight: 180;
+  line-height: 0.92;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-1);
+  margin-left: -3px;
+}
+.wx-hero__deg {
+  font-size: 38px;
+  font-weight: 200;
+  letter-spacing: 0;
+  margin-top: 8px;
+  margin-left: 2px;
+  color: var(--text-2);
+}
+
+.wx-hero__meta {
+  text-align: right;
+  padding-top: 4px;
+}
+.wx-hero__text {
+  font-size: 16px;
+  font-weight: 560;
+  letter-spacing: var(--tracking-normal);
+  color: var(--text-1);
+}
+.wx-hero__range {
+  margin-top: 3px;
+  font-family: var(--font-num);
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+
+.wx-hero__sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-3);
+  letter-spacing: 0.01em;
+}
+.wx-hero__dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--text-3);
+  opacity: 0.6;
+}
+
+/* ---- 详情网格 ---- */
+.wx-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+  margin: 2px 0 14px;
+}
+.wx-cell {
+  padding: 10px 9px 9px;
+  border-radius: 14px;
+  background: var(--fill-1);
+  transition: background-color 200ms var(--ease-out);
+}
+.wx-cell:hover {
+  background: var(--fill-2);
+}
+.wx-cell__label {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  text-transform: uppercase;
+}
+.wx-cell__value {
+  margin-top: 5px;
+  font-family: var(--font-num);
+  font-size: 15px;
+  font-weight: 560;
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-1);
+  white-space: nowrap;
+}
+.wx-cell__value small {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-3);
+  margin-left: 1px;
+}
+
+/* ---- 温度曲线 ---- */
+.wx-chart {
+  margin: 0 0 12px;
+  padding: 12px 4px 2px;
+  border-radius: 16px;
+  background: var(--fill-1);
+  position: relative;
+  overflow: hidden;
+}
+.wx-chart__svg {
+  display: block;
+  width: 100%;
+  height: 64px;
+}
+.wx-chart__labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 10px 7px;
+  font-family: var(--font-num);
+  font-size: 9.5px;
+  font-weight: 500;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.wx-chart__line {
+  fill: none;
+  stroke: var(--chart-line);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 5px rgba(100, 210, 255, 0.45));
+}
+[data-theme="light"] .wx-chart__line {
+  filter: drop-shadow(0 0 4px rgba(10, 132, 255, 0.28));
+}
+.wx-chart__area {
+  stroke: none;
+}
+.wx-chart__dot {
+  fill: var(--chart-line);
+}
+
+/* ---- 三日预报 ---- */
+.wx-days {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.wx-day {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 5px;
+  border-radius: 11px;
+  transition: background-color 180ms var(--ease-out);
+}
+.wx-day:hover {
+  background: var(--fill-1);
+}
+.wx-day__name {
+  width: 40px;
+  font-size: 12.5px;
+  font-weight: 560;
+  color: var(--text-2);
+  letter-spacing: var(--tracking-normal);
+}
+.wx-day__icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  color: var(--text-2);
+}
+.wx-day__text {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wx-day__bar {
+  position: relative;
+  width: 84px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--fill-1);
+  overflow: hidden;
+  flex: none;
+}
+.wx-day__bar i {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--chart-line);
+  opacity: 0.78;
+}
+.wx-day__range {
+  width: 62px;
+  text-align: right;
+  font-family: var(--font-num);
+  font-size: 12px;
+  font-weight: 560;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-1);
+}
+.wx-day__range span {
+  color: var(--text-3);
+  font-weight: 500;
+}
+
+/* ---- 状态提示（加载 / 出错）---- */
+.wx-state {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-3);
+}
+.wx-state__spin {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.6px solid var(--fill-2);
+  border-top-color: var(--text-2);
+  animation: spin 900ms linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.wx-state.is-error {
+  color: var(--danger);
+}

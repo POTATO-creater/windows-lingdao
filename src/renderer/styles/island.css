@@ -1,0 +1,266 @@
+/* ==================================================================
+   灵动岛本体：形变容器 + 玻璃材质 + 顶栏
+   ------------------------------------------------------------------
+   尺寸变量 --iw/--ih 由 JS 弹簧逐帧写入，所以这里绝对不能写
+   transition: width/height，否则会和弹簧打架（Apple 原则：
+   手势驱动的动画必须能被随时打断，CSS 过渡做不到）。
+   ================================================================== */
+
+#app {
+  /* 与主进程窗口尺寸的差值：窗口 = 胶囊 + 2×10px，留给投影 */
+  padding: 10px;
+}
+
+.island {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: var(--iw);
+  height: var(--ih);
+  border-radius: var(--ir);
+  overflow: hidden;
+  isolation: isolate;
+  /* 只对 transform 做过渡（hover 缩放），尺寸交给 JS */
+  transition: transform 220ms var(--ease-out);
+  will-change: width, height, border-radius;
+}
+
+/* ---- 玻璃底层 ---- */
+.island__glass {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(178deg, var(--glass-1) 0%, var(--glass-2) 100%);
+  box-shadow: var(--shadow-ambient), var(--shadow-inner),
+    inset 0 0 0 1px var(--stroke-outer);
+  /* 真·背景模糊在 transparent 窗口下拿不到桌面内容，
+     这里保留是为了「浅色系叠加时的柔和边缘」；质感主要靠上面的渐变 */
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+}
+
+/* ---- 顶部高光：模拟玻璃厚度与受光 ---- */
+.island__sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--glass-sheen);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 42%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 42%);
+  pointer-events: none;
+}
+
+/* ---- 顶栏（收起态就是全部内容）---- */
+.bar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--bar-h);
+  padding: 0 22px;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.bar__center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.bar__time {
+  font-family: var(--font-num);
+  font-size: 18px;
+  font-weight: 560;
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-1);
+  transition: font-size 260ms var(--ease-out), font-weight 260ms var(--ease-out);
+}
+.bar__sec {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out);
+}
+/* 秒针只在「闹钟页」露出来，符合「需要有精确度时才显示」 */
+[data-tab="alarm"][data-state="expanded"] .bar__sec {
+  opacity: 1;
+}
+
+/* 顶栏左右内容：收起/展开两套，交叉淡化 */
+.bar__side {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+.bar__swap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: opacity 220ms var(--ease-out), transform 320ms var(--ease-out);
+}
+
+/* 收起态：温度 + 闹钟 */
+.bar__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: var(--text-1);
+  opacity: 0.92;
+  flex: none;
+}
+.bar__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.bar__temp {
+  font-family: var(--font-num);
+  font-size: 16.5px;
+  font-weight: 560;
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-1);
+}
+
+.bar__alarm-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-num);
+  font-size: 12.5px;
+  font-weight: 560;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+  padding: 4px 9px 4px 8px;
+  border-radius: 20px;
+  background: var(--fill-1);
+}
+.bar__alarm-chip svg {
+  width: 12px;
+  height: 12px;
+  color: var(--warm);
+}
+.bar__alarm-chip.is-empty {
+  padding: 4px 6px;
+  background: transparent;
+  color: var(--text-3);
+}
+
+/* 展开态才显示的城市名 */
+.bar__city {
+  font-size: 13.5px;
+  font-weight: 590;
+  letter-spacing: var(--tracking-normal);
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+/* 收起态可见 / 展开态可见 的控制 */
+.is-expanded-only {
+  opacity: 0;
+  pointer-events: none;
+}
+[data-state="expanded"] .is-expanded-only {
+  opacity: 1;
+  pointer-events: auto;
+}
+[data-state="expanded"] .is-collapsed-only {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-6px);
+}
+
+/* ---- 内容区 ---- */
+.body {
+  position: absolute;
+  z-index: 1;
+  top: var(--bar-h);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 2px 20px 22px;
+  opacity: 0;
+  transform: translateY(-14px) scale(0.985);
+  transform-origin: 50% 0%;
+  pointer-events: none;
+  /* 收起方向要快、展开方向由 JS 加 class 后延迟进入 */
+  transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out);
+}
+[data-state="expanded"] .body {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  transition: opacity 300ms var(--ease-out) 90ms,
+    transform 420ms var(--ease-ios) 60ms;
+}
+
+.body__scroll {
+  height: 100%;
+  padding-right: 2px;
+}
+
+/* ---- 展开动画：子元素逐个落位（stagger）---- */
+.stagger > * {
+  opacity: 0;
+  transform: translateY(10px);
+}
+[data-state="expanded"] .stagger > * {
+  opacity: 1;
+  transform: none;
+  transition: opacity 320ms var(--ease-out), transform 460ms var(--ease-out);
+}
+[data-state="expanded"] .stagger > *:nth-child(1) { transition-delay: 70ms; }
+[data-state="expanded"] .stagger > *:nth-child(2) { transition-delay: 110ms; }
+[data-state="expanded"] .stagger > *:nth-child(3) { transition-delay: 150ms; }
+[data-state="expanded"] .stagger > *:nth-child(4) { transition-delay: 190ms; }
+[data-state="expanded"] .stagger > *:nth-child(5) { transition-delay: 225ms; }
+[data-state="expanded"] .stagger > *:nth-child(6) { transition-delay: 255ms; }
+[data-state="expanded"] .stagger > *:nth-child(7) { transition-delay: 285ms; }
+
+/* ---- hover：轻微膨胀 + 提亮，模拟「有生命」的反馈 ---- */
+.island.is-hover:not(.is-dragging) {
+  transform: translate(-50%, -50%) scale(1.012);
+}
+[data-state="expanded"] .island.is-hover {
+  transform: translate(-50%, -50%);
+}
+
+/* ---- 拖拽中：降低阴影，避免像「浮起来」---- */
+.island.is-dragging {
+  transform: translate(-50%, -50%) scale(1.008);
+  transition: transform 120ms var(--ease-out);
+}
+
+/* ---- 闹钟响铃：整体呼吸脉冲 ---- */
+.island.is-ringing .island__glass {
+  animation: ring-pulse 1.6s var(--ease-ios) infinite;
+}
+@keyframes ring-pulse {
+  0%, 100% {
+    box-shadow: var(--shadow-ambient), var(--shadow-inner),
+      inset 0 0 0 1px var(--stroke-outer),
+      0 0 0 0 rgba(255, 69, 58, 0);
+  }
+  50% {
+    box-shadow: var(--shadow-ambient), var(--shadow-inner),
+      inset 0 0 0 1px rgba(255, 69, 58, 0.55),
+      0 0 0 6px rgba(255, 69, 58, 0.10);
+  }
+}
