@@ -1,0 +1,13 @@
+# 依赖与产物
+node_modules/
+dist/
+.preview/
+
+# 本地配置（含用户自己的城市/闹钟）
+config.json
+*.log
+
+# 不存二进制：图标与截图都能由脚本重新生成
+build/icon.*
+src/assets/tray.png
+docs/desk-*.jpg
