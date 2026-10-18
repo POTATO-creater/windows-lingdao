@@ -1,0 +1,114 @@
+/* ==================================================================
+   设计令牌
+   ------------------------------------------------------------------
+   改这里 = 改全局观感。分三部分：
+   1. 尺寸变量（--iw/--ih/--ir 由 JS 弹簧逐帧驱动，勿手动 transition）
+   2. 颜色与材质（深色 / 浅色两套，data-theme 切换）
+   3. 排版与动效曲线
+   ================================================================== */
+
+:root {
+  /* ---- 形变尺寸：由 src/renderer/scripts/island.js 每帧写入 ---- */
+  --iw: 300px;      /* 胶囊宽 */
+  --ih: 64px;       /* 胶囊高 */
+  --ir: 32px;       /* 圆角 */
+  --bar-h: 64px;    /* 顶栏高，与收起态高度一致 */
+
+  /* ---- 排版 ---- */
+  --font-ui: "SF Pro Display", "SF Pro Text", -apple-system,
+    "Segoe UI Variable Display", "Segoe UI", "PingFang SC",
+    "Microsoft YaHei UI", system-ui, sans-serif;
+  --font-num: "SF Pro Display", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+
+  /* 光学字号：大字收紧字距、减轻字重 */
+  --tracking-tight: -0.032em;
+  --tracking-normal: -0.011em;
+  --tracking-wide: 0.02em;
+
+  /* ---- 动效 ---- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-ios: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 140ms;
+  --dur-base: 260ms;
+}
+
+/* ================= 深色（默认 / 跟随系统时深色）================= */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --glass-1: rgba(31, 31, 34, 0.94);
+  --glass-2: rgba(14, 14, 16, 0.96);
+  --glass-sheen: linear-gradient(
+    170deg,
+    rgba(255, 255, 255, 0.10) 0%,
+    rgba(255, 255, 255, 0.028) 26%,
+    rgba(255, 255, 255, 0) 55%
+  );
+
+  --stroke-top: rgba(255, 255, 255, 0.15);
+  --stroke-outer: rgba(255, 255, 255, 0.07);
+  --shadow-ambient: 0 10px 34px rgba(0, 0, 0, 0.50), 0 2px 8px rgba(0, 0, 0, 0.34);
+  --shadow-inner: inset 0 1px 0 rgba(255, 255, 255, 0.10);
+
+  --text-1: rgba(255, 255, 255, 0.97);
+  --text-2: rgba(255, 255, 255, 0.68);
+  --text-3: rgba(255, 255, 255, 0.44);
+  --text-invert: rgba(10, 10, 12, 0.92);
+
+  --fill-1: rgba(255, 255, 255, 0.075);
+  --fill-2: rgba(255, 255, 255, 0.13);
+  --fill-hover: rgba(255, 255, 255, 0.16);
+
+  --accent: #0a84ff;
+  --accent-soft: rgba(10, 132, 255, 0.20);
+  --warm: #ff9f0a;
+  --danger: #ff453a;
+  --success: #32d74b;
+
+  --seg-bg: rgba(120, 120, 128, 0.22);
+  --seg-thumb: rgba(99, 99, 105, 0.92);
+  --chart-line: #64d2ff;
+  --chart-fill-a: rgba(100, 210, 255, 0.26);
+  --chart-fill-b: rgba(100, 210, 255, 0);
+}
+
+/* ================= 浅色 ================= */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --glass-1: rgba(253, 253, 255, 0.93);
+  --glass-2: rgba(241, 242, 246, 0.96);
+  --glass-sheen: linear-gradient(
+    170deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 255, 255, 0.28) 30%,
+    rgba(255, 255, 255, 0) 60%
+  );
+
+  --stroke-top: rgba(255, 255, 255, 0.90);
+  --stroke-outer: rgba(0, 0, 0, 0.08);
+  --shadow-ambient: 0 8px 28px rgba(20, 22, 30, 0.12), 0 2px 6px rgba(20, 22, 30, 0.07);
+  --shadow-inner: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+
+  --text-1: rgba(15, 17, 22, 0.94);
+  --text-2: rgba(15, 17, 22, 0.64);
+  --text-3: rgba(15, 17, 22, 0.44);
+  --text-invert: rgba(255, 255, 255, 0.96);
+
+  --fill-1: rgba(15, 17, 22, 0.045);
+  --fill-2: rgba(15, 17, 22, 0.09);
+  --fill-hover: rgba(15, 17, 22, 0.12);
+
+  --accent: #007aff;
+  --accent-soft: rgba(0, 122, 255, 0.14);
+  --warm: #ff9500;
+  --danger: #ff3b30;
+  --success: #34c759;
+
+  --seg-bg: rgba(120, 120, 128, 0.14);
+  --seg-thumb: #ffffff;
+  --chart-line: #0a84ff;
+  --chart-fill-a: rgba(10, 132, 255, 0.20);
+  --chart-fill-b: rgba(10, 132, 255, 0);
+}
